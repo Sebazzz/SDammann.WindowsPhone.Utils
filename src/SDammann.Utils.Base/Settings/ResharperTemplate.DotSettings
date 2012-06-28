@@ -1,0 +1,29 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Shortcut/@EntryValue">WPSetting</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Description/@EntryValue">Template for WP7 settings</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Text/@EntryValue"> /// &lt;summary&gt;&#xD;
+/// Gets or sets $Documentation$&#xD;
+/// &lt;/summary&gt;&#xD;
+public $SettingType$ $SettingName$ {&#xD;
+    [DebuggerStepThrough]&#xD;
+    get { return Get("$SettingName$", () =&gt; default($SettingType$)); }&#xD;
+    [DebuggerStepThrough]&#xD;
+    set { Set("$SettingName$", value); }&#xD;
+}</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Categories/=Imported_00208_002D3_002D2012/@EntryIndexedValue">Imported 8-3-2012</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/Type/@EntryValue">InCSharpTypeMember</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingName/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingName/Expression/@EntryValue">suggestVariableName()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingName/InitialRange/@EntryValue">1</s:Int64>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingName/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingType/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingType/Expression/@EntryValue">completeType()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=SettingType/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=Documentation/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=C25B3B2AA1AE3D41A09196303228EEFF/Field/=Documentation/Order/@EntryValue">2</s:Int64></wpf:ResourceDictionary>

@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils", "SDammann.Utils\SDammann.Utils.csproj", "{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils.Base", "SDammann.Utils.Base\SDammann.Utils.Base.csproj", "{B6024D89-6669-4139-B741-ADBFFFF2ECD5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6024D89-6669-4139-B741-ADBFFFF2ECD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6024D89-6669-4139-B741-ADBFFFF2ECD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6024D89-6669-4139-B741-ADBFFFF2ECD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6024D89-6669-4139-B741-ADBFFFF2ECD5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
