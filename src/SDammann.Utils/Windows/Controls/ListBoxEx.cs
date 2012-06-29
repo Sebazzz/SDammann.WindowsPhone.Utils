@@ -9,7 +9,18 @@
     using System.Windows.Input;
     using System.Windows.Markup;
 
-
+    /* Sample usage:
+     * 
+     *   	<Controls:ListBoxEx ItemsSource="{Binding BundleViewModels}" 
+  				ItemTemplate="{StaticResource BundleViewTemplate}" 
+  				toolkit:TiltEffect.IsTiltEnabled="True" 
+  				ItemSelectCommand="{Binding BundleSelectedCommand, Mode=OneWay}">
+  				<Border>
+  					<TextBlock Text="Sorry, no items in this list!" Style="{StaticResource NoListBoxContentTextStyle}" FontSize="{StaticResource PhoneFontSizeMedium}" Visibility="{Binding ShellTray.IsProgressVisible, Converter={StaticResource BoolVisibilityConverter}}" />
+  				</Border>
+  			</Controls:ListBoxEx>
+     * 
+     * */
     /// <summary>
     ///   Extended version of a <see cref="ListBox" /> .
     /// </summary>

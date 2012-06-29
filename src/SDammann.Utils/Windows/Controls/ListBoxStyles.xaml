@@ -94,5 +94,6 @@
     <Style TargetType="Controls:ListBoxEx">
         <Setter Property="Template" Value="{StaticResource ListBoxTemplate}" />
         <Setter Property="EmptyTemplate" Value="{StaticResource ListBoxEmpty}" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource ListBoxStretchTemplate}"/>
     </Style>
 </ResourceDictionary>

@@ -22,3 +22,10 @@ Highlights
 Classes to check out:
 - UserInterfaceThreadDispatcher and DelegateExtensions: Helper interface for dispatching asynchronous updates back to the UI
 - SettingsBase: Base class for general application settings
+- ListBoxEx: Extended version of the Windows Phone listbox that supports an empty view (shown when there are no items in the list), command binding for MVVM.
+- GlobalApplication: Base class for you application definition (App.xaml) that provides you with debugging tools and prevents boilerplate code.
+
+Style files to check out:
+- TransitionStyles.xaml: Avoid that bloilerplate clutter of Silverlight Toolkit transitions and apply one of the style to your page.
+- ListBoxStyles.xaml/ListBoxEmptyStretchTemplate: Fixes a bug in the standard Windows Phone listbox, where items are not horizontally stretched to its container.
+
