@@ -29,3 +29,7 @@ Style files to check out:
 - TransitionStyles.xaml: Avoid that bloilerplate clutter of Silverlight Toolkit transitions and apply one of the style to your page.
 - ListBoxStyles.xaml/ListBoxEmptyStretchTemplate: Fixes a bug in the standard Windows Phone listbox, where items are not horizontally stretched to its container.
 
+
+Wiki pages
+----------------------------
+Check out the [wiki pages](https://github.com/Sebazzz/SDammann.WindowsPhone.Utils/wiki).
