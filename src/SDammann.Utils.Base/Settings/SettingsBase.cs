@@ -53,7 +53,7 @@ namespace SDammann.Utils.Settings {
                 if (this.isSynchronized) {
                     Monitor.Enter(SyncRoot);
                 }
-                this.SetSetting(key, value);
+                this.SetSetting(this.settingsPrefix + key, value);
             } finally {
                 if (this.isSynchronized) {
                     Monitor.Exit(SyncRoot);
@@ -136,7 +136,7 @@ namespace SDammann.Utils.Settings {
             // update value in cache
             this.cachedValues [key] = value;
             if (this.autoSave) {
-                this.isolatedStorageSettings[this.settingsPrefix + key] = value;
+                this.isolatedStorageSettings[key] = value;
             }
 
             // check for property change and raise event
@@ -158,16 +158,15 @@ namespace SDammann.Utils.Settings {
             T retrievedValue;
             if (!this.cachedValues.TryGetValue(key, out retrievedObject)) {
                 // get from isolated sotrange
-                if (!this.isolatedStorageSettings.TryGetValue(this.settingsPrefix + key,
-                                                         out retrievedValue)) {
+                if (!this.isolatedStorageSettings.TryGetValue(key, out retrievedValue)) {
                     retrievedValue = defaultValueFactory.Invoke();
                 }
 
                 // update cache and persistent storage
-                this.cachedValues [key] = retrievedValue;
+                this.cachedValues[key] = retrievedValue;
                 
                 if (this.autoSave) {
-                    this.isolatedStorageSettings [key] = retrievedValue;
+                    this.isolatedStorageSettings[key] = retrievedValue;
                 }
             } else {
                 retrievedValue = (T) retrievedObject;
