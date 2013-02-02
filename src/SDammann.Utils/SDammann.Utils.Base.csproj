@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}</ProjectGuid>
+    <ProjectGuid>{B6024D89-6669-4139-B741-ADBFFFF2ECD5}</ProjectGuid>
     <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SDammann.Utils</RootNamespace>
-    <AssemblyName>SDammann.Utils</AssemblyName>
+    <AssemblyName>SDammann.Utils.Base</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
@@ -29,9 +29,8 @@
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
     <NoWarn>1591</NoWarn>
-    <DocumentationFile>Bin\Debug\SDammann.Utils.XML</DocumentationFile>
+    <DocumentationFile>Bin\Debug\SDammann.Utils.Base.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -42,68 +41,58 @@
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>Bin\Release\SDammann.Utils.XML</DocumentationFile>
+    <DocumentationFile>Bin\Release\SDammann.Utils.Base.XML</DocumentationFile>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Phone" />
-    <Reference Include="Microsoft.Phone.Controls.Toolkit">
-      <HintPath>..\..\..\..\SDammann.SimmieStatus\packages\WPtoolkit.4.2012.10.30\lib\sl4-windowsphone71\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows" />
     <Reference Include="system" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Net" />
+    <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Windows\Controls\ExtraColorResources.cs" />
-    <Compile Include="Windows\Controls\ListBoxEx.cs" />
-    <Compile Include="Windows\Data\BoolVisibilityConverter.cs" />
-    <Compile Include="Windows\Data\DoubleIntegerConverter.cs" />
-    <Compile Include="Windows\Data\InvertBooleanConverter.cs" />
+    <Compile Include="AsyncResultBase.cs" />
+    <Compile Include="Collections\Generic\ListExtensions.cs" />
+    <Compile Include="Collections\Generic\PrefixDictionary.cs" />
+    <Compile Include="Collections\ObjectModel\IViewModelFor.cs" />
+    <Compile Include="Collections\ObjectModel\SyncedReadOnlyObservableCollection.cs" />
+    <Compile Include="Collections\ObjectModel\ViewModelCreator.cs" />
+    <Compile Include="Collections\ObjectModel\ViewModelObservableCollection.cs" />
+    <Compile Include="GenericAsyncResult.cs" />
+    <Compile Include="IO\IIsolatedStorageSettings.cs" />
+    <Compile Include="IO\RuntimeIsolatedStorageSettings.cs" />
+    <Compile Include="Linq\EnumerableExtensions.cs" />
+    <Compile Include="Linq\Expressions\ExpressionHelper.cs" />
+    <Compile Include="ObjectCopyHelper.cs" />
+    <Compile Include="Phone\Marketplace\TrialCheckerService.cs" />
+    <Compile Include="Phone\Marketplace\TrialService.cs" />
+    <Compile Include="Phone\Shell\TimeSegment.cs" />
+    <Compile Include="Phone\Shell\ToastHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Windows\Design\MetroGridHelper.cs" />
-    <Compile Include="Windows\GeneralApplication.cs" />
-    <Compile Include="Windows\Media\ColorUtilities.cs" />
-    <Compile Include="Windows\Media\DuoColorBrush.cs" />
-    <Compile Include="Windows\VisibilityHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Themes\generic.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Resource>
-    <Resource Include="Windows\Controls\ListBoxStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Resource>
-    <Resource Include="Windows\Controls\TransitionStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Resource>
-    <Resource Include="Windows\Controls\CommonStyles.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SDammann.Utils.Base\SDammann.Utils.Base.csproj">
-      <Project>{B6024D89-6669-4139-B741-ADBFFFF2ECD5}</Project>
-      <Name>SDammann.Utils.Base</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="README_FIRST.txt" />
-    <Content Include="SDammann.Utils.Base.csproj" />
-    <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
-    <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <Compile Include="ServiceLocator\IServiceProviderEx.cs" />
+    <Compile Include="ServiceLocator\ServiceProviderExtensions.cs" />
+    <Compile Include="ServiceLocator\ServiceResolver.cs" />
+    <None Include="Settings\Settings.ExampleUsage.cs" />
+    <Compile Include="Settings\SettingsBase.cs" />
+    <Compile Include="Surrogates\System\ComponentModel\DataAnnotations\RequiredAttribute.cs" />
+    <Compile Include="Surrogates\System\ComponentModel\DataAnnotations\StringLengthAttribute.cs" />
+    <Compile Include="Surrogates\System\ComponentModel\DataAnnotations\ValidationAttribute.cs" />
+    <Compile Include="Surrogates\System\Lazy.cs" />
+    <Compile Include="Surrogates\System\Serializable.cs" />
+    <Compile Include="Text\RandomStringGenerator.cs" />
+    <Compile Include="Threading\DelegateExtensions.cs" />
+    <Compile Include="Threading\ISynchronizedObject.cs" />
+    <Compile Include="Threading\SynchronizationWrapper.cs" />
+    <Compile Include="Threading\UserInterfaceThreadDispatcher.cs" />
+    <Compile Include="VoidAsyncResult.cs" />
+    <Compile Include="WeakReference.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
