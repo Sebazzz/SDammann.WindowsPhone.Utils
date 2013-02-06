@@ -158,12 +158,12 @@ namespace SDammann.Utils.Settings {
             T retrievedValue;
             if (!this.cachedValues.TryGetValue(key, out retrievedObject)) {
                 // get from isolated sotrange
-                if (!this.isolatedStorageSettings.TryGetValue(key, out retrievedValue)) {
+                if (!this.isolatedStorageSettings.TryGetValue(key,out retrievedValue)) {
                     retrievedValue = defaultValueFactory.Invoke();
                 }
 
                 // update cache and persistent storage
-                this.cachedValues[key] = retrievedValue;
+                this.cachedValues [key] = retrievedValue;
                 
                 if (this.autoSave) {
                     this.isolatedStorageSettings[key] = retrievedValue;
