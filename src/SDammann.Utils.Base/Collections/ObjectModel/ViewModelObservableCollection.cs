@@ -116,14 +116,14 @@
 
             switch (e.Action) {
                 case NotifyCollectionChangedAction.Add:
-                    IQueryable<TModel> addedItems = e.NewItems.AsQueryable().OfType<TModel>();
+                    var addedItems = e.NewItems.OfType<TModel>();
                     foreach (TModel item in addedItems) {
                         this.Add(this.viewModelCreator.Invoke(item));
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
-                    IQueryable<TModel> removedItems = e.OldItems.AsQueryable().OfType<TModel>();
+                    var removedItems = e.OldItems.OfType<TModel>();
                     foreach (TModel removedItem in removedItems) {
                         this.Remove(this.Single(vm => ReferenceEquals(vm.Model, removedItem)));
                     }
