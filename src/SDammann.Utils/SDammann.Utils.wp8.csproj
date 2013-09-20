@@ -139,7 +139,7 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SDammann.Utils.Base\SDammann.Utils.Base.csproj">
+    <ProjectReference Include="..\SDammann.Utils.Base\SDammann.Utils.Base.wp8.csproj">
       <Project>{B6024D89-6669-4139-B741-ADBFFFF2ECD5}</Project>
       <Name>SDammann.Utils.Base</Name>
     </ProjectReference>
