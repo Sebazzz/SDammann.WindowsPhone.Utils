@@ -1,13 +1,20 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils", "SDammann.Utils\SDammann.Utils.csproj", "{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils.wp7", "SDammann.Utils\SDammann.Utils.wp7.csproj", "{0D5DC7FA-6BFA-4B3B-B8E0-0AB525AA6C4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils.Base", "SDammann.Utils.Base\SDammann.Utils.Base.csproj", "{B6024D89-6669-4139-B741-ADBFFFF2ECD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDammann.Utils.Base.wp7", "SDammann.Utils.Base\SDammann.Utils.Base.wp7.csproj", "{B6024D89-6669-4139-B741-ADBFFFF2ECD5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F80CF747-7461-473A-BCD6-DF3F632BF7A4}"
 	ProjectSection(SolutionItems) = preProject
 		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4A3F9315-A92D-4D4D-8A87-C35AC6CDD599}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Global

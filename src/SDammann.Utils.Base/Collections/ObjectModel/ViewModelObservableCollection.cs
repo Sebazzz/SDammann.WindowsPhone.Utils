@@ -116,18 +116,15 @@
 
             switch (e.Action) {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (object item in e.NewItems)
-                    {
-                        TModel obj = item as TModel;
-                        if (obj != null)
-                        {
-                            this.Add(this.viewModelCreator.Invoke(obj));
-                        }
+                    var addedItems = e.NewItems.OfType<TModel>();
+                    foreach (TModel item in addedItems) {
+                        this.Add(this.viewModelCreator.Invoke(item));
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (object removedItem in e.OldItems) {
+                    var removedItems = e.OldItems.OfType<TModel>();
+                    foreach (TModel removedItem in removedItems) {
                         this.Remove(this.Single(vm => ReferenceEquals(vm.Model, removedItem)));
                     }
                     break;
