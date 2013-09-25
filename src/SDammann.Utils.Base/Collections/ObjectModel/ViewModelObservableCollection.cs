@@ -17,18 +17,19 @@
     public class ViewModelObservableCollection<TViewModel, TModel> : ObservableCollection<TViewModel>, IDisposable
         where TViewModel : class, IViewModelFor<TModel>
         where TModel : class {
-        private readonly SynchronizationContext creationContext;
-        private readonly bool isSynchronizedCollection;
-        private readonly Thread originalThread;
-        private readonly SyncedReadOnlyObservableCollection<TModel> sourceCollection;
-        private readonly ViewModelCreator<TViewModel, TModel> viewModelCreator;
 
-        private bool disposed;
+        private readonly SynchronizationContext _creationContext;
+        private readonly bool _isSynchronizedCollection;
+        private readonly Thread _originalThread;
+        private readonly SyncedReadOnlyObservableCollection<TModel> _sourceCollection;
+        private readonly ViewModelCreator<TViewModel, TModel> _viewModelCreator;
+
+        private bool _isDisposed;
 
         private bool IsOnCurrentThread {
             get {
                 Thread currentThread = Thread.CurrentThread;
-                return currentThread.ManagedThreadId == this.originalThread.ManagedThreadId;
+                return currentThread.ManagedThreadId == this._originalThread.ManagedThreadId;
             }
         }
 
@@ -37,7 +38,7 @@
         /// </summary>
         internal SyncedReadOnlyObservableCollection<TModel> SourceCollection {
             [DebuggerStepThrough]
-            get { return this.sourceCollection; }
+            get { return this._sourceCollection; }
         }
 
         /// <summary>
@@ -49,14 +50,14 @@
         public ViewModelObservableCollection(ViewModelCreator<TViewModel, TModel> viewModelCreator,
                                              SyncedReadOnlyObservableCollection<TModel> sourceCollection,
                                              bool synchronize = false) {
-            this.isSynchronizedCollection = synchronize;
-            this.creationContext = synchronize ? SynchronizationContext.Current : null;
-            this.originalThread = synchronize ? Thread.CurrentThread : null;
+            this._isSynchronizedCollection = synchronize;
+            this._creationContext = synchronize ? SynchronizationContext.Current : null;
+            this._originalThread = synchronize ? Thread.CurrentThread : null;
 
-            this.viewModelCreator = viewModelCreator;
-            this.sourceCollection = sourceCollection;
+            this._viewModelCreator = viewModelCreator;
+            this._sourceCollection = sourceCollection;
 
-            INotifyCollectionChanged watcher = this.sourceCollection;
+            INotifyCollectionChanged watcher = this._sourceCollection;
             watcher.CollectionChanged += this.OnSourceCollectionChanged;
         }
 
@@ -74,15 +75,15 @@
         /// </summary>
         /// <param name="disposing"> <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources. </param>
         protected virtual void Dispose(bool disposing) {
-            if (!this.disposed) {
+            if (!this._isDisposed) {
                 if (disposing) {
-                    if (this.sourceCollection != null) {
-                        INotifyCollectionChanged watcher = this.sourceCollection;
+                    if (this._sourceCollection != null) {
+                        INotifyCollectionChanged watcher = this._sourceCollection;
                         watcher.CollectionChanged -= this.OnSourceCollectionChanged;
                     }
                 }
 
-                this.disposed = true;
+                this._isDisposed = true;
             }
         }
 
@@ -104,13 +105,13 @@
         }
 
         /// <summary>
-        ///   Called when the <see cref="sourceCollection" /> is changed
+        ///   Called when the <see cref="_sourceCollection" /> is changed
         /// </summary>
         /// <param name="sender"> The sender. </param>
         /// <param name="e"> The <see cref="System.Collections.Specialized.NotifyCollectionChangedEventArgs" /> instance containing the event data. </param>
         private void OnSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-            if (this.isSynchronizedCollection && !this.IsOnCurrentThread) {
-                this.creationContext.Post(delegate { this.OnSourceCollectionChanged(sender, e); }, null);
+            if (this._isSynchronizedCollection && !this.IsOnCurrentThread) {
+                this._creationContext.Post(delegate { this.OnSourceCollectionChanged(sender, e); }, null);
                 return;
             }
 
@@ -118,7 +119,7 @@
                 case NotifyCollectionChangedAction.Add:
                     var addedItems = e.NewItems.OfType<TModel>();
                     foreach (TModel item in addedItems) {
-                        this.Add(this.viewModelCreator.Invoke(item));
+                        this.Add(this._viewModelCreator.Invoke(item));
                     }
                     break;
 
@@ -133,7 +134,7 @@
                     TModel newItem = e.NewItems.OfType<TModel>().FirstOrDefault();
 
                     if (newItem != null) {
-                        this.SetItem(e.NewStartingIndex, this.viewModelCreator.Invoke(newItem));
+                        this.SetItem(e.NewStartingIndex, this._viewModelCreator.Invoke(newItem));
                     }
                     break;
 
