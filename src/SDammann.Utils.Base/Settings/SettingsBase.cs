@@ -51,12 +51,12 @@ namespace SDammann.Utils.Settings {
             // set value, optionally locking
             try {
                 if (this.isSynchronized) {
-                    Monitor.Enter(SyncRoot);
+                    this.GetSettingsLock();
                 }
                 this.SetSetting(this.settingsPrefix + key, value);
             } finally {
                 if (this.isSynchronized) {
-                    Monitor.Exit(SyncRoot);
+                    this.ReleaseSettingsLock();
                 }
             }
             
@@ -105,15 +105,29 @@ namespace SDammann.Utils.Settings {
             // get value, optionally locking
             try {
                 if (this.isSynchronized) {
-                    Monitor.Enter(SyncRoot);
+                    this.GetSettingsLock();
                 }
 
                 return this.GetSetting(this.settingsPrefix + key, defaultValueFactory);
             } finally {
                 if (this.isSynchronized) {
-                    Monitor.Exit(SyncRoot);
+                    this.ReleaseSettingsLock();
                 }
             }
+        }
+
+        /// <summary>
+        /// Releases a lock on the settings
+        /// </summary>
+        private void ReleaseSettingsLock() {
+            Monitor.Exit(SyncRoot);
+        }
+
+        /// <summary>
+        /// Acquires a lock on the settings
+        /// </summary>
+        private void GetSettingsLock() {
+            Monitor.Enter(SyncRoot);
         }
 
         /// <summary>
