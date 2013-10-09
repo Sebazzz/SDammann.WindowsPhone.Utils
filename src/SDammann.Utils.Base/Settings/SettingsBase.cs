@@ -16,14 +16,14 @@ namespace SDammann.Utils.Settings {
         private static readonly object SyncRoot = new object();
         private const char PrefixSeperator = '_';
 
-        private readonly IIsolatedStorageSettings isolatedStorageSettings;
+        private readonly IIsolatedStorageSettings _isolatedStorageSettings;
 
-        private readonly bool autoSave;
-        private readonly bool isSynchronized;
-        private readonly bool designMode;
+        private readonly bool _autoSave;
+        private readonly bool _isSynchronized;
+        private readonly bool _designMode;
 
-        private readonly string settingsPrefix;
-        private readonly Dictionary<string, object> cachedValues;
+        private readonly string _settingsPrefix;
+        private readonly Dictionary<string, object> _cachedValues;
 
         /// <summary>
         /// Gets a value indicating whether this instance automatically saves items to the persistent storage. If false, <see cref="Save"/> must be used to update
@@ -34,7 +34,7 @@ namespace SDammann.Utils.Settings {
         /// </value>
         public bool AutoSave {
             [DebuggerStepThrough]
-            get { return this.autoSave; }
+            get { return this._autoSave; }
         }
 
         /// <summary>
@@ -46,17 +46,17 @@ namespace SDammann.Utils.Settings {
         /// </remarks>
         protected void Set<T>(string key, T value) {
             // ignore design-time set requests
-            if (this.designMode) { return; }
+            if (this._designMode) { return; }
 
             // set value, optionally locking
             try {
-                if (this.isSynchronized) {
-                    this.GetSettingsLock();
+                if (this._isSynchronized) {
+                    GetSettingsLock();
                 }
-                this.SetSetting(this.settingsPrefix + key, value);
+                this.SetSetting(this._settingsPrefix + key, value);
             } finally {
-                if (this.isSynchronized) {
-                    this.ReleaseSettingsLock();
+                if (this._isSynchronized) {
+                    ReleaseSettingsLock();
                 }
             }
             
@@ -98,20 +98,20 @@ namespace SDammann.Utils.Settings {
             defaultValueFactory = defaultValueFactory ?? (() => default(T));
 
             // return design-time value if required
-            if (this.designMode) {
+            if (this._designMode) {
                 return (designTimeValueFactory ?? defaultValueFactory).Invoke();
             }
 
             // get value, optionally locking
             try {
-                if (this.isSynchronized) {
-                    this.GetSettingsLock();
+                if (this._isSynchronized) {
+                    GetSettingsLock();
                 }
 
-                return this.GetSetting(this.settingsPrefix + key, defaultValueFactory);
+                return this.GetSetting(this._settingsPrefix + key, defaultValueFactory);
             } finally {
-                if (this.isSynchronized) {
-                    this.ReleaseSettingsLock();
+                if (this._isSynchronized) {
+                    ReleaseSettingsLock();
                 }
             }
         }
@@ -119,14 +119,14 @@ namespace SDammann.Utils.Settings {
         /// <summary>
         /// Releases a lock on the settings
         /// </summary>
-        private void ReleaseSettingsLock() {
+        private static void ReleaseSettingsLock() {
             Monitor.Exit(SyncRoot);
         }
 
         /// <summary>
         /// Acquires a lock on the settings
         /// </summary>
-        private void GetSettingsLock() {
+        private static void GetSettingsLock() {
             Monitor.Enter(SyncRoot);
         }
 
@@ -140,17 +140,17 @@ namespace SDammann.Utils.Settings {
             // ... from cache
             Object originalObject;
             T originalValue;
-            if (!this.cachedValues.TryGetValue(key, out originalObject)) {
+            if (!this._cachedValues.TryGetValue(key, out originalObject)) {
                 // ... from isolated storage settings
-                this.isolatedStorageSettings.TryGetValue(key, out originalValue);
+                this._isolatedStorageSettings.TryGetValue(key, out originalValue);
             } else {
                 originalValue = (T) originalObject;
             }
             
             // update value in cache
-            this.cachedValues [key] = value;
-            if (this.autoSave) {
-                this.isolatedStorageSettings[key] = value;
+            this._cachedValues [key] = value;
+            if (this._autoSave) {
+                this._isolatedStorageSettings[key] = value;
             }
 
             // check for property change and raise event
@@ -170,17 +170,17 @@ namespace SDammann.Utils.Settings {
             // get value from cache
             Object retrievedObject;
             T retrievedValue;
-            if (!this.cachedValues.TryGetValue(key, out retrievedObject)) {
+            if (!this._cachedValues.TryGetValue(key, out retrievedObject)) {
                 // get from isolated sotrange
-                if (!this.isolatedStorageSettings.TryGetValue(key,out retrievedValue)) {
+                if (!this._isolatedStorageSettings.TryGetValue(key,out retrievedValue)) {
                     retrievedValue = defaultValueFactory.Invoke();
                 }
 
                 // update cache and persistent storage
-                this.cachedValues [key] = retrievedValue;
+                this._cachedValues [key] = retrievedValue;
                 
-                if (this.autoSave) {
-                    this.isolatedStorageSettings[key] = retrievedValue;
+                if (this._autoSave) {
+                    this._isolatedStorageSettings[key] = retrievedValue;
                 }
             } else {
                 retrievedValue = (T) retrievedObject;
@@ -196,17 +196,17 @@ namespace SDammann.Utils.Settings {
         /// <param name="isSynchronized">if set to <c>true</c> if the object is thread-safe. If true, no other components should access the isolated storage settings via a non-thread-safe object.</param>
         /// <param name="customSettingsKey">The custom settings key to use for backwards compatibility.</param>
         protected SettingsBase(bool autoSave = true, bool isSynchronized = false, string customSettingsKey =null) {
-            this.autoSave = autoSave;
-            this.isSynchronized = isSynchronized;
+            this._autoSave = autoSave;
+            this._isSynchronized = isSynchronized;
 
-            this.settingsPrefix = (customSettingsKey ?? this.GetType().FullName) + PrefixSeperator;
-            this.cachedValues = new Dictionary<string, object>();
+            this._settingsPrefix = (customSettingsKey ?? this.GetType().FullName) + PrefixSeperator;
+            this._cachedValues = new Dictionary<string, object>();
 
             if (!DesignerProperties.IsInDesignTool) {
-                this.isolatedStorageSettings = ServiceLocator.ServiceResolver.GetService<IIsolatedStorageSettings>();
-                this.designMode = false;
+                this._isolatedStorageSettings = ServiceLocator.ServiceResolver.GetService<IIsolatedStorageSettings>();
+                this._designMode = false;
             } else {
-                this.designMode = true;
+                this._designMode = true;
             }
         }
 
@@ -221,14 +221,14 @@ namespace SDammann.Utils.Settings {
         ///   Clears all the settings
         /// </summary>
         public void Clear() {
-            if (this.designMode) { return; }
+            if (this._designMode) { return; }
 
-            var settingKeys = new string[this.isolatedStorageSettings.Keys.Count];
-            this.isolatedStorageSettings.Keys.CopyTo(settingKeys, 0);
+            var settingKeys = new string[this._isolatedStorageSettings.Keys.Count];
+            this._isolatedStorageSettings.Keys.CopyTo(settingKeys, 0);
 
             foreach (string settingKey in settingKeys) {
-                if (settingKey.StartsWith(this.settingsPrefix)) {
-                    this.isolatedStorageSettings.Remove(settingKey);
+                if (settingKey.StartsWith(this._settingsPrefix)) {
+                    this._isolatedStorageSettings.Remove(settingKey);
                 }
             }
         }
@@ -241,20 +241,20 @@ namespace SDammann.Utils.Settings {
         /// It is recommended to call this method in the <see cref="PhoneApplicationService.Deactivated"/> and <see cref="PhoneApplicationService.Closing"/> event handlers.
         /// </remarks>
         public void Save() {
-            if (!this.autoSave) {
-                foreach (KeyValuePair<string, object> cachedValue in cachedValues) {
-                    this.isolatedStorageSettings[cachedValue.Key] = cachedValue.Value;
+            if (!this._autoSave) {
+                foreach (KeyValuePair<string, object> cachedValue in this._cachedValues) {
+                    this._isolatedStorageSettings[cachedValue.Key] = cachedValue.Value;
                 }
             }
 
-            this.isolatedStorageSettings.Save();
+            this._isolatedStorageSettings.Save();
         }
 
         /// <summary>
         /// Reloads all settings from isolated storage, discarding any newly set cached values. This method has no effect if <see cref="AutoSave"/> is true.
         /// </summary>
         public void Reload() {
-            this.cachedValues.Clear();
+            this._cachedValues.Clear();
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace SDammann.Utils.Settings {
         public override bool Equals(object obj) {
             SettingsBase other = obj as SettingsBase;
 
-            return other != null && other.settingsPrefix == this.settingsPrefix;
+            return other != null && other._settingsPrefix == this._settingsPrefix;
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace SDammann.Utils.Settings {
         /// <returns> A <see cref="System.String" /> that represents this instance. </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override string ToString() {
-            return this.settingsPrefix;
+            return this._settingsPrefix;
         }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace SDammann.Utils.Settings {
         /// <returns> A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode() {
-            return this.settingsPrefix.GetHashCode();
+            return this._settingsPrefix.GetHashCode();
         }
 
         /// <summary>
