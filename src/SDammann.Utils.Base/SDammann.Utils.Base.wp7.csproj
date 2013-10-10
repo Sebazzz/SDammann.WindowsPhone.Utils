@@ -80,7 +80,6 @@
     <Compile Include="ServiceLocator\IServiceProviderEx.cs" />
     <Compile Include="ServiceLocator\ServiceProviderExtensions.cs" />
     <Compile Include="ServiceLocator\ServiceResolver.cs" />
-    <None Include="Settings\Settings.ExampleUsage.cs" />
     <Compile Include="Settings\SettingsBase.cs" />
     <Compile Include="Surrogates\System\ComponentModel\DataAnnotations\RequiredAttribute.cs" />
     <Compile Include="Surrogates\System\ComponentModel\DataAnnotations\StringLengthAttribute.cs" />
