@@ -3,27 +3,90 @@ namespace SDammann.Utils.Settings {
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.Runtime.Serialization;
     using System.Threading;
     using IO;
     using Microsoft.Phone.Shell;
+    using ServiceLocator;
 
+    /// <summary>
+    /// Mock interface for <see cref="SettingsBase"/>
+    /// </summary>
+    public interface ISettingsBase : INotifyPropertyChanged {
+        /// <summary>
+        /// Gets a value indicating whether this instance automatically saves items to the persistent storage. If false, <see cref="Save"/> must be used to update
+        /// persistent storage with the internal cache.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if auto saving; otherwise, <c>false</c>.
+        /// </value>
+        bool AutoSave { [DebuggerStepThrough] get; }
+
+        /// <summary>
+        ///   Clears all the settings
+        /// </summary>
+        void Clear();
+
+        /// <summary>
+        /// Saves all the settings to persistent storage. Only required when <see cref="SettingsBase.AutoSave"/> is true. 
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="SettingsBase.AutoSave"/> is true, any call to this method is ignored and will just explicitly save the internal storage object.
+        /// It is recommended to call this method in the <see cref="PhoneApplicationService.Deactivated"/> and <see cref="PhoneApplicationService.Closing"/> event handlers.
+        /// </remarks>
+        void Save();
+
+        /// <summary>
+        /// Reloads all settings from isolated storage, discarding any newly set cached values. This method has no effect if <see cref="SettingsBase.AutoSave"/> is true.
+        /// </summary>
+        void Reload();
+    }
 
     /// <summary>
     /// Represents the base class for application settings
     /// </summary>
-    public abstract class SettingsBase : INotifyPropertyChanged {
-        private static readonly object SyncRoot = new object();
+    public abstract class SettingsBase : ISettingsBase {
         private const char PrefixSeperator = '_';
-
-        private readonly IIsolatedStorageSettings _isolatedStorageSettings;
+        private static readonly object SyncRoot = new object();
 
         private readonly bool _autoSave;
-        private readonly bool _isSynchronized;
+        private readonly Dictionary<string, object> _cachedValues;
         private readonly bool _designMode;
+        private readonly bool _isSynchronized;
+        private readonly IIsolatedStorageSettings _isolatedStorageSettings;
 
         private readonly string _settingsPrefix;
-        private readonly Dictionary<string, object> _cachedValues;
+
+        /// <summary>
+        /// Initializes the <see cref="SettingsBase"/> class.
+        /// </summary>
+        static SettingsBase() {
+            // inject isolated storage settings runtime object
+            ServiceResolver.AddMapping<IIsolatedStorageSettings>(() => new RuntimeIsolatedStorageSettings());
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SettingsBase"/> class.
+        /// </summary>
+        /// <param name="autoSave">if set to <c>true</c> automatically save the settings when set.</param>
+        /// <param name="isSynchronized">if set to <c>true</c> if the object is thread-safe. If true, no other components should access the isolated storage settings via a non-thread-safe object.</param>
+        /// <param name="customSettingsKey">The custom settings key to use for backwards compatibility.</param>
+        protected SettingsBase(bool autoSave = true, bool isSynchronized = false, string customSettingsKey = null) {
+            this._autoSave = autoSave;
+            this._isSynchronized = isSynchronized;
+
+            this._settingsPrefix = (customSettingsKey ?? this.GetType().FullName) + PrefixSeperator;
+            this._cachedValues = new Dictionary<string, object>();
+
+            if (!DesignerProperties.IsInDesignTool) {
+                this._isolatedStorageSettings = ServiceResolver.GetService<IIsolatedStorageSettings>();
+                this._designMode = false;
+            }
+            else {
+                this._designMode = true;
+            }
+        }
+
+        #region ISettingsBase Members
 
         /// <summary>
         /// Gets a value indicating whether this instance automatically saves items to the persistent storage. If false, <see cref="Save"/> must be used to update
@@ -37,6 +100,53 @@ namespace SDammann.Utils.Settings {
             get { return this._autoSave; }
         }
 
+        /// <summary />
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        ///   Clears all the settings
+        /// </summary>
+        public void Clear() {
+            if (this._designMode) {
+                return;
+            }
+
+            var settingKeys = new string[this._isolatedStorageSettings.Keys.Count];
+            this._isolatedStorageSettings.Keys.CopyTo(settingKeys, 0);
+
+            foreach (string settingKey in settingKeys) {
+                if (settingKey.StartsWith(this._settingsPrefix)) {
+                    this._isolatedStorageSettings.Remove(settingKey);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saves all the settings to persistent storage. Only required when <see cref="AutoSave"/> is true. 
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="AutoSave"/> is true, any call to this method is ignored and will just explicitly save the internal storage object.
+        /// It is recommended to call this method in the <see cref="PhoneApplicationService.Deactivated"/> and <see cref="PhoneApplicationService.Closing"/> event handlers.
+        /// </remarks>
+        public void Save() {
+            if (!this._autoSave) {
+                foreach (var cachedValue in this._cachedValues) {
+                    this._isolatedStorageSettings[cachedValue.Key] = cachedValue.Value;
+                }
+            }
+
+            this._isolatedStorageSettings.Save();
+        }
+
+        /// <summary>
+        /// Reloads all settings from isolated storage, discarding any newly set cached values. This method has no effect if <see cref="AutoSave"/> is true.
+        /// </summary>
+        public void Reload() {
+            this._cachedValues.Clear();
+        }
+
+        #endregion
+
         /// <summary>
         ///   Sets the <see cref="System.Object" /> with the specified key and value. 
         ///   The key should be equal to the property that calls this.
@@ -46,7 +156,9 @@ namespace SDammann.Utils.Settings {
         /// </remarks>
         protected void Set<T>(string key, T value) {
             // ignore design-time set requests
-            if (this._designMode) { return; }
+            if (this._designMode) {
+                return;
+            }
 
             // set value, optionally locking
             try {
@@ -54,12 +166,12 @@ namespace SDammann.Utils.Settings {
                     GetSettingsLock();
                 }
                 this.SetSetting(this._settingsPrefix + key, value);
-            } finally {
+            }
+            finally {
                 if (this._isSynchronized) {
                     ReleaseSettingsLock();
                 }
             }
-            
         }
 
         /// <summary>
@@ -109,7 +221,8 @@ namespace SDammann.Utils.Settings {
                 }
 
                 return this.GetSetting(this._settingsPrefix + key, defaultValueFactory);
-            } finally {
+            }
+            finally {
                 if (this._isSynchronized) {
                     ReleaseSettingsLock();
                 }
@@ -143,12 +256,13 @@ namespace SDammann.Utils.Settings {
             if (!this._cachedValues.TryGetValue(key, out originalObject)) {
                 // ... from isolated storage settings
                 this._isolatedStorageSettings.TryGetValue(key, out originalValue);
-            } else {
+            }
+            else {
                 originalValue = (T) originalObject;
             }
-            
+
             // update value in cache
-            this._cachedValues [key] = value;
+            this._cachedValues[key] = value;
             if (this._autoSave) {
                 this._isolatedStorageSettings[key] = value;
             }
@@ -166,95 +280,28 @@ namespace SDammann.Utils.Settings {
         /// <param name="key">The key.</param>
         /// <param name="defaultValueFactory">The default value factory.</param>
         /// <returns></returns>
-        private T GetSetting <T>(string key, Func<T> defaultValueFactory) {
+        private T GetSetting<T>(string key, Func<T> defaultValueFactory) {
             // get value from cache
             Object retrievedObject;
             T retrievedValue;
             if (!this._cachedValues.TryGetValue(key, out retrievedObject)) {
                 // get from isolated sotrange
-                if (!this._isolatedStorageSettings.TryGetValue(key,out retrievedValue)) {
+                if (!this._isolatedStorageSettings.TryGetValue(key, out retrievedValue)) {
                     retrievedValue = defaultValueFactory.Invoke();
                 }
 
                 // update cache and persistent storage
-                this._cachedValues [key] = retrievedValue;
-                
+                this._cachedValues[key] = retrievedValue;
+
                 if (this._autoSave) {
                     this._isolatedStorageSettings[key] = retrievedValue;
                 }
-            } else {
+            }
+            else {
                 retrievedValue = (T) retrievedObject;
             }
 
             return retrievedValue;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SettingsBase"/> class.
-        /// </summary>
-        /// <param name="autoSave">if set to <c>true</c> automatically save the settings when set.</param>
-        /// <param name="isSynchronized">if set to <c>true</c> if the object is thread-safe. If true, no other components should access the isolated storage settings via a non-thread-safe object.</param>
-        /// <param name="customSettingsKey">The custom settings key to use for backwards compatibility.</param>
-        protected SettingsBase(bool autoSave = true, bool isSynchronized = false, string customSettingsKey =null) {
-            this._autoSave = autoSave;
-            this._isSynchronized = isSynchronized;
-
-            this._settingsPrefix = (customSettingsKey ?? this.GetType().FullName) + PrefixSeperator;
-            this._cachedValues = new Dictionary<string, object>();
-
-            if (!DesignerProperties.IsInDesignTool) {
-                this._isolatedStorageSettings = ServiceLocator.ServiceResolver.GetService<IIsolatedStorageSettings>();
-                this._designMode = false;
-            } else {
-                this._designMode = true;
-            }
-        }
-
-        #region INotifyPropertyChanged Members
-
-        /// <summary />
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
-        /// <summary>
-        ///   Clears all the settings
-        /// </summary>
-        public void Clear() {
-            if (this._designMode) { return; }
-
-            var settingKeys = new string[this._isolatedStorageSettings.Keys.Count];
-            this._isolatedStorageSettings.Keys.CopyTo(settingKeys, 0);
-
-            foreach (string settingKey in settingKeys) {
-                if (settingKey.StartsWith(this._settingsPrefix)) {
-                    this._isolatedStorageSettings.Remove(settingKey);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Saves all the settings to persistent storage. Only required when <see cref="AutoSave"/> is true. 
-        /// </summary>
-        /// <remarks>
-        /// If <see cref="AutoSave"/> is true, any call to this method is ignored and will just explicitly save the internal storage object.
-        /// It is recommended to call this method in the <see cref="PhoneApplicationService.Deactivated"/> and <see cref="PhoneApplicationService.Closing"/> event handlers.
-        /// </remarks>
-        public void Save() {
-            if (!this._autoSave) {
-                foreach (KeyValuePair<string, object> cachedValue in this._cachedValues) {
-                    this._isolatedStorageSettings[cachedValue.Key] = cachedValue.Value;
-                }
-            }
-
-            this._isolatedStorageSettings.Save();
-        }
-
-        /// <summary>
-        /// Reloads all settings from isolated storage, discarding any newly set cached values. This method has no effect if <see cref="AutoSave"/> is true.
-        /// </summary>
-        public void Reload() {
-            this._cachedValues.Clear();
         }
 
         /// <summary>
@@ -264,7 +311,7 @@ namespace SDammann.Utils.Settings {
         /// <returns> <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c> . </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override bool Equals(object obj) {
-            SettingsBase other = obj as SettingsBase;
+            var other = obj as SettingsBase;
 
             return other != null && other._settingsPrefix == this._settingsPrefix;
         }
@@ -307,14 +354,6 @@ namespace SDammann.Utils.Settings {
             if (handler != null) {
                 handler.Invoke(this, e);
             }
-        }
-
-        /// <summary>
-        /// Initializes the <see cref="SettingsBase"/> class.
-        /// </summary>
-        static SettingsBase() {
-            // inject isolated storage settings runtime object
-            ServiceLocator.ServiceResolver.AddMapping<IIsolatedStorageSettings>(() => new RuntimeIsolatedStorageSettings());
         }
     }
 }
