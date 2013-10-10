@@ -3,6 +3,7 @@ namespace SDammann.Utils.Settings {
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Runtime.Serialization;
     using System.Threading;
     using IO;
     using Microsoft.Phone.Shell;
