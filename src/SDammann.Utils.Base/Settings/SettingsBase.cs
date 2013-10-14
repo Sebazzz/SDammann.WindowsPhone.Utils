@@ -3,6 +3,7 @@ namespace SDammann.Utils.Settings {
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Linq;
     using System.Runtime.Serialization;
     using System.Threading;
     using IO;
@@ -46,9 +47,13 @@ namespace SDammann.Utils.Settings {
     /// Represents the base class for application settings
     /// </summary>
     public abstract class SettingsBase : ISettingsBase {
+        private const string SettingsVersionKeyTemplate = "{0}{1}_SDammannSettingsBaseVersion";
         private const char PrefixSeperator = '_';
         private static readonly object SyncRoot = new object();
 
+        private bool _isVersionUpgradeChecked;
+        private bool _isMigratingSettings;
+        private readonly int _version;
         private readonly bool _autoSave;
         private readonly Dictionary<string, object> _cachedValues;
         private readonly bool _designMode;
@@ -56,6 +61,27 @@ namespace SDammann.Utils.Settings {
         private readonly IIsolatedStorageSettings _isolatedStorageSettings;
 
         private readonly string _settingsPrefix;
+
+        /// <summary>
+        /// Gets the current declared (compiled) settings version
+        /// </summary>
+        protected int DeclaredVersion {
+            get { return this._version; }
+        }
+
+        /// <summary>
+        /// Gets the actual version (isolated storage) of the settings. When null, no version was used.
+        /// </summary>
+        protected int? PersistentVersion {
+            get {
+                string key = String.Format(SettingsVersionKeyTemplate, this._settingsPrefix, PrefixSeperator);
+                return GetSetting<int?>(key, () => null);
+            }
+            set {
+                string key = String.Format(SettingsVersionKeyTemplate, this._settingsPrefix, PrefixSeperator);
+                SetSetting(key, value);
+            }
+        }
 
         /// <summary>
         /// Initializes the <see cref="SettingsBase"/> class.
@@ -68,10 +94,12 @@ namespace SDammann.Utils.Settings {
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsBase"/> class.
         /// </summary>
+        /// <param name="version">Declared compiled settings version</param>
         /// <param name="autoSave">if set to <c>true</c> automatically save the settings when set.</param>
         /// <param name="isSynchronized">if set to <c>true</c> if the object is thread-safe. If true, no other components should access the isolated storage settings via a non-thread-safe object.</param>
         /// <param name="customSettingsKey">The custom settings key to use for backwards compatibility.</param>
-        protected SettingsBase(bool autoSave = true, bool isSynchronized = false, string customSettingsKey = null) {
+        protected SettingsBase(int version, bool autoSave = true, bool isSynchronized = false, string customSettingsKey = null) {
+            this._version = version;
             this._autoSave = autoSave;
             this._isSynchronized = isSynchronized;
 
@@ -85,6 +113,68 @@ namespace SDammann.Utils.Settings {
             else {
                 this._designMode = true;
             }
+        }
+
+        /// <summary>
+        /// Executes any pending version upgrades
+        /// </summary>
+        protected void ExecuteVersionUpgrade() {
+            if (this._isVersionUpgradeChecked) {
+                return;
+            }
+
+            int? persistedVersion = this.PersistentVersion;
+            
+            // check if current version equals: no upgrade necessary
+            if (persistedVersion != null && persistedVersion.Value == this._version) {
+                this._isVersionUpgradeChecked = true;
+                return;
+            }
+
+            // if persisted version is null, we're executing an upgrade 
+            int newVersion;
+            
+            // migrate pre-version support updates
+            if (persistedVersion == null) {
+                // check we have any settings actually
+                if (this._isolatedStorageSettings.Keys.OfType<string>().Count(k => k.StartsWith(this._settingsPrefix, StringComparison.OrdinalIgnoreCase)) <= 1) {
+                    // always the 'persisted version' key will be made, hence the '1'
+                    this.PersistentVersion = this.DeclaredVersion;
+                    this._isVersionUpgradeChecked = true;
+
+                    this.Save();
+                    return;
+                }
+
+                this._isMigratingSettings = true;
+                this.MigrateFromUnknownToFirstVersion(out newVersion);
+                this.PersistentVersion = newVersion;
+            } else {
+                this._isMigratingSettings = true;
+                newVersion = persistedVersion.Value;
+            }
+
+            // while we're not up-to-date, execute upgrades
+            while (newVersion < this.DeclaredVersion) {
+                this.MigrateVersion(newVersion, out newVersion);
+            }
+
+            // set version
+            this.PersistentVersion = DeclaredVersion;
+            this.Save();
+            this._isVersionUpgradeChecked = true;
+            this._isMigratingSettings = false;
+        }
+
+        private void EnsureCorrectVersion() {
+            if (this._isVersionUpgradeChecked || this._isMigratingSettings) {
+                return;
+            }
+
+            Debug.WriteLine("Warning: ExecuteVersionUpgrade was NOT called in the constructor. For proper performance, please call this method.");
+            this.ExecuteVersionUpgrade();
+
+            Debug.Assert(this._isVersionUpgradeChecked);
         }
 
         #region ISettingsBase Members
@@ -112,14 +202,15 @@ namespace SDammann.Utils.Settings {
                 return;
             }
 
-            var settingKeys = new string[this._isolatedStorageSettings.Keys.Count];
-            this._isolatedStorageSettings.Keys.CopyTo(settingKeys, 0);
-
-            foreach (string settingKey in settingKeys) {
+            // clear settings with our prefix
+            IEnumerable<string> keys = this._isolatedStorageSettings.Keys.OfType<string>().Where(s => s.StartsWith(_settingsPrefix + PrefixSeperator));
+            foreach (string settingKey in keys) {
                 if (settingKey.StartsWith(this._settingsPrefix)) {
                     this._isolatedStorageSettings.Remove(settingKey);
                 }
             }
+
+            this.Reload();
         }
 
         /// <summary>
@@ -153,13 +244,15 @@ namespace SDammann.Utils.Settings {
         ///   The key should be equal to the property that calls this.
         /// </summary>
         /// <remarks>
-        /// Undocumented by MSDN, but very much true: You can set any [<see cref="DataContractAttribute"/>] that is public with a public parameterless constructor.
+        /// Undocumented by MSDN, but very much true: You can set any [DataContractAttribute] that is public with a public parameterless constructor.
         /// </remarks>
         protected void Set<T>(string key, T value) {
             // ignore design-time set requests
             if (this._designMode) {
                 return;
             }
+
+            this.EnsureCorrectVersion();
 
             // set value, optionally locking
             try {
@@ -169,6 +262,30 @@ namespace SDammann.Utils.Settings {
                 this.SetSetting(this._settingsPrefix + key, value);
             }
             finally {
+                if (this._isSynchronized) {
+                    ReleaseSettingsLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears the value for the specified setting from the persistent store
+        /// </summary>
+        /// <param name="key"></param>
+        protected void Clear(string key) {
+            // ignore design-time clear requests
+            if (this._designMode) {
+                return;
+            }
+
+            // clear value, optionally locking
+            try {
+                if (this._isSynchronized) {
+                    GetSettingsLock();
+                }
+
+                this.ClearSetting(this._settingsPrefix + key);
+            } finally {
                 if (this._isSynchronized) {
                     ReleaseSettingsLock();
                 }
@@ -214,6 +331,8 @@ namespace SDammann.Utils.Settings {
             if (this._designMode) {
                 return (designTimeValueFactory ?? defaultValueFactory).Invoke();
             }
+
+            this.EnsureCorrectVersion();
 
             // get value, optionally locking
             try {
@@ -306,6 +425,17 @@ namespace SDammann.Utils.Settings {
         }
 
         /// <summary>
+        /// Clears the setting specified
+        /// </summary>
+        private void ClearSetting(string key) {
+            Object retrievedObject;
+            this._isolatedStorageSettings.Remove(key);
+            if (this._cachedValues.TryGetValue(key, out retrievedObject)) {
+                this._cachedValues.Remove(key);
+            }
+        }
+
+        /// <summary>
         ///   Determines whether the specified <see cref="System.Object" /> is equal to this instance.
         /// </summary>
         /// <param name="obj"> The <see cref="System.Object" /> to compare with this instance. </param>
@@ -323,7 +453,7 @@ namespace SDammann.Utils.Settings {
         /// <returns> A <see cref="System.String" /> that represents this instance. </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override string ToString() {
-            return this._settingsPrefix;
+            return this._settingsPrefix + ":" + this._version;
         }
 
         /// <summary>
@@ -332,7 +462,7 @@ namespace SDammann.Utils.Settings {
         /// <returns> A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode() {
-            return this._settingsPrefix.GetHashCode();
+            return this._settingsPrefix.GetHashCode() ^ this._version.GetHashCode();
         }
 
         /// <summary>
@@ -356,5 +486,17 @@ namespace SDammann.Utils.Settings {
                 handler.Invoke(this, e);
             }
         }
+
+        /// <summary>
+        /// Migrates settings from a unknown version to the first version. Output parameter is the new version we're upgraded to.
+        /// </summary>
+        protected abstract void MigrateFromUnknownToFirstVersion(out int newVersion);
+
+        /// <summary>
+        /// Migrates settings from the specified source version, output parameter specifies new version the logic has upgraded the settings to.
+        /// </summary>
+        /// <param name="sourceVersion">Declared settings version</param>
+        /// <param name="newVersion"> </param>
+        protected abstract void MigrateVersion(int sourceVersion, out int newVersion);
     }
 }

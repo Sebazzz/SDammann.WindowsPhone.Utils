@@ -12,14 +12,14 @@
         /// Contains mappings from interfaces/abstract types to concrete types
         /// </summary>
         private static readonly Dictionary<Type, Func<object>> Mappings = CreateServiceMappings();
-        private static IServiceProviderEx ServiceProvider = null;
+        private static IServiceProviderEx _ServiceProvider = null;
 
         /// <summary>
         /// Sets the service resolver used to initialize view models and their dependencies
         /// </summary>
         /// <param name="serviceResolver">The service resolver. It may be null.</param>
         public static void SetServiceResolver(IServiceProviderEx serviceResolver) {
-            ServiceProvider = serviceResolver;
+            _ServiceProvider = serviceResolver;
         }
 
         /// <summary>
@@ -28,11 +28,11 @@
         /// <typeparam name="TService"> The type of the service to resolve. </typeparam>
         /// <returns> An object of type <typeparamref name="TService" /> or <c>null</c> if the could not be resolved. </returns>
         public static TService GetService<TService>() where TService : class {
-            if (ServiceProvider == null) {
+            if (_ServiceProvider == null) {
                 return GetServiceInternal<TService>();
             }
 
-            return ServiceProvider.GetService<TService>() ?? GetServiceInternal<TService>();
+            return _ServiceProvider.GetService<TService>() ?? GetServiceInternal<TService>();
         }
 
         /// <summary>
@@ -40,8 +40,8 @@
         /// </summary>
         /// <param name="instance"></param>
         public static void InjectInstance(object instance) {
-            if (ServiceProvider != null) {
-                ServiceProvider.Inject(instance);
+            if (_ServiceProvider != null) {
+                _ServiceProvider.Inject(instance);
             }
         }
 
