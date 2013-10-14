@@ -1,6 +1,7 @@
 ﻿namespace SDammann.Utils.ServiceLocator {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
 
@@ -41,7 +42,12 @@
         /// <param name="instance"></param>
         public static void InjectInstance(object instance) {
             if (_ServiceProvider != null) {
-                _ServiceProvider.Inject(instance);
+                try {
+                    _ServiceProvider.Inject(instance);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Didn't inject instance '{0}' because error occured. {1}", instance.GetType(), ex);
+                    throw;
+                }
             }
         }
 

@@ -220,7 +220,7 @@ namespace SDammann.Utils.Settings {
         /// If <see cref="AutoSave"/> is true, any call to this method is ignored and will just explicitly save the internal storage object.
         /// It is recommended to call this method in the <see cref="PhoneApplicationService.Deactivated"/> and <see cref="PhoneApplicationService.Closing"/> event handlers.
         /// </remarks>
-        public void Save() {
+        public virtual void Save() {
             if (!this._autoSave) {
                 foreach (var cachedValue in this._cachedValues) {
                     this._isolatedStorageSettings[cachedValue.Key] = cachedValue.Value;
