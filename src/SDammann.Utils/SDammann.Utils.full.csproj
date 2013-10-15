@@ -7,8 +7,8 @@
     <ProjectGuid>{5CD2A306-94B5-4A7A-987E-7F32988B7D55}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SDammann.Utils.Full</RootNamespace>
-    <AssemblyName>SDammann.Utils.Full</AssemblyName>
+    <RootNamespace>SDammann.Utils</RootNamespace>
+    <AssemblyName>SDammann.Utils</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
