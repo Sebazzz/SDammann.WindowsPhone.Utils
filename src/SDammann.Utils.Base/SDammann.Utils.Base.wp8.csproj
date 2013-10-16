@@ -114,6 +114,7 @@
     <Compile Include="Collections\ObjectModel\SyncedReadOnlyObservableCollection.cs" />
     <Compile Include="Collections\ObjectModel\ViewModelCreator.cs" />
     <Compile Include="Collections\ObjectModel\ViewModelObservableCollection.cs" />
+    <Compile Include="DiagnosticHelper.cs" />
     <Compile Include="GenericAsyncResult.cs" />
     <Compile Include="IO\IIsolatedStorageSettings.cs" />
     <Compile Include="IO\RuntimeIsolatedStorageSettings.cs" />
