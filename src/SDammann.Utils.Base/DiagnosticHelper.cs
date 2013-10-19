@@ -57,6 +57,12 @@
 
                 _FileName = fileName;
 
+#if DEBUG
+                if (_IsolatedStorage.FileExists(_FileName)) {
+                    _IsolatedStorage.DeleteFile(_FileName);
+                }
+#endif
+
                 IsEnabled = enable;
                 if (enable) {
                     WriteLogFileHeader();
