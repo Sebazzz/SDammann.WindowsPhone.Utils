@@ -93,11 +93,20 @@
         /// </summary>
         /// <returns></returns>
         public static string GetLoggedText() {
-            using (IsolatedStorageFileStream stream = _IsolatedStorage.OpenFile(_FileName, FileMode.Open, FileAccess.Read)) {
-                using (StreamReader streamReader = new StreamReader(stream)) {
-                    return streamReader.ReadToEnd();
+            try {
+                using (
+                    IsolatedStorageFileStream stream = _IsolatedStorage.OpenFile(_FileName, FileMode.Open,
+                        FileAccess.Read)) {
+                    using (StreamReader streamReader = new StreamReader(stream)) {
+                        return streamReader.ReadToEnd();
+                    }
                 }
             }
+            catch (Exception ex) {
+                Debug.WriteLine("Couldn't get diagnostic log. {0}", ex);
+            }
+
+            return null;
         }
 
         /// <summary>
